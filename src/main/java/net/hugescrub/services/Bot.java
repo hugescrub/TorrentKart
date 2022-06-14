@@ -123,11 +123,11 @@ public class Bot extends TelegramLongPollingBot {
             StringBuilder sb = new StringBuilder();
 
             for (String link : gamesResults.getGameLinks()){
-                sb.append(link);
+                sb.append(link).append("\n");
             }
 
             for (String name : gamesResults.getGameNames()){
-                sb.append(name);
+                sb.append(name).append("\n");
             }
             execute(
                     SendMessage.builder()

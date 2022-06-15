@@ -8,12 +8,13 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.MessageEntity;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class Bot extends TelegramLongPollingBot {
 
@@ -34,7 +35,11 @@ public class Bot extends TelegramLongPollingBot {
             handleMessage(update.getMessage());
         }
 
-        if(update.hasMessage() && !(update.getMessage().getText().contains("/"))){
+        if (update.hasMessage() && !(update.getMessage().getText().contains("/"))) {
+            handleRequest(update.getMessage());
+        }
+
+        if (update.getMessage().hasText() && update.hasCallbackQuery() && !(update.getMessage().getText().contains("/"))) {
             handleRequest(update.getMessage());
         }
     }
@@ -107,7 +112,7 @@ public class Bot extends TelegramLongPollingBot {
      * @param message Represents received user message.
      */
     @SneakyThrows
-    public void handleRequest(Message message){
+    public void handleRequest(Message message) {
 
         Long chatId = message.getChatId();
 
@@ -118,23 +123,64 @@ public class Bot extends TelegramLongPollingBot {
                             .chatId(chatId.toString())
                             .build()
             );
-        }  else if (message.hasText()) {
+        } else if (message.hasText()) {
             GamesResults gamesResults = TrackerParser.searchGames(message.getText());
             StringBuilder sb = new StringBuilder();
 
-            for (String link : gamesResults.getGameLinks()){
+            for (String link : gamesResults.getGameLinks()) {
                 sb.append(link).append("\n");
             }
 
-            for (String name : gamesResults.getGameNames()){
+            for (String name : gamesResults.getGameNames()) {
                 sb.append(name).append("\n");
             }
+
+            // get links and names
+            List<String> links = gamesResults.getGameLinks();
+            List<String> names = gamesResults.getGameNames();
+
+            // put inside
+            List<List<InlineKeyboardButton>> buttons = buttonsFromData(links, names);
+
             execute(
                     SendMessage.builder()
                             .text(sb.toString())
                             .chatId(chatId.toString())
+                            .replyMarkup(InlineKeyboardMarkup.builder()
+                                    .keyboard(buttons)
+                                    .build())
                             .build());
         }
+    }
+
+    /**
+     * @param links Represents links of parsed <a/> tag elements
+     * @param names Represents text of parsed <a/> tag elements
+     * @return Returns inline buttons to send them as a reply for user message
+     */
+    public List<List<InlineKeyboardButton>> buttonsFromData(List<String> links, List<String> names) {
+        // create rows and buttons
+        List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
+        List<InlineKeyboardButton> rows = new ArrayList<>();
+
+        // iterate links and names to put them in rows
+        Iterator<String> linksIterator = links.listIterator();
+        Iterator<String> namesIterator = names.listIterator();
+
+        // put rows
+        while (linksIterator.hasNext() && namesIterator.hasNext()) {
+            int counter = 0;
+            while (counter < names.size()) {
+                List<InlineKeyboardButton> newButton = new ArrayList<>();
+                newButton.add(InlineKeyboardButton.builder()
+                        .text(namesIterator.next())
+                        .url(linksIterator.next())
+                        .build());
+                buttons.add(newButton);
+                counter++;
+            }
+        }
+        return buttons;
     }
 
     @Override

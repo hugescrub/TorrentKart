@@ -1,8 +1,13 @@
 package net.hugescrub.services;
 
+import lombok.SneakyThrows;
 import net.hugescrub.models.GamesResults;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -15,15 +20,11 @@ import java.util.Map;
 
 public class TrackerParser {
     private static final String BASE_URL = "https://it.itorrents-igruha.org";
-
-    public static void main(String[] args) throws UnsupportedEncodingException {
-        // JSONObject jsonObject = searchGames();
-        TrackerParser.searchGames("monster hunter");
-    }
+    private static final String URL_PATH = "/index.php?";
+    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36 OPR/86.0.4363.70";
 
     public static GamesResults searchGames(String searchString) {
-        final String URL_PATH = "/index.php?";
-        final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36 OPR/86.0.4363.70";
+
         URL url = null;
         String response = null;
 
@@ -42,7 +43,7 @@ public class TrackerParser {
             String requestBody = getDataString(urlEncodedMap);
             url = new URL(String.format("%s/%s%s", BASE_URL, URL_PATH, requestBody));
 
-            var document = Jsoup.connect(url.toString())
+            Document document = Jsoup.connect(url.toString())
                     .method(Connection.Method.POST)
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .header("User-Agent", USER_AGENT)
@@ -50,14 +51,14 @@ public class TrackerParser {
                     .timeout(10000)
                     .get();
 
-            var gameData = document.select("div.article-film-title > a");
+            Elements gameData = document.select("div.article-film-title > a");
             System.out.println(gameData);
 
             System.out.println();
 
             gameLinks = new ArrayList<>();
             System.out.println("Links:\n");
-            for (var elementLink : gameData) {
+            for (Element elementLink : gameData) {
                 gameLinks.add(elementLink.attr("href"));
                 System.out.println(elementLink.attr("href"));
             }
@@ -66,7 +67,7 @@ public class TrackerParser {
 
             gameNames = new ArrayList<>();
             System.out.println("Game names:\n");
-            for (var elementName : gameData) {
+            for (Element elementName : gameData) {
                 gameNames.add(elementName.text());
                 System.out.println(elementName.text());
             }
@@ -81,6 +82,24 @@ public class TrackerParser {
         gamesResults.setGameLinks(gameLinks);
         gamesResults.setGameNames(gameNames);
         return gamesResults;
+    }
+
+    @SneakyThrows
+    public static void getFile(String url) {
+
+        final String DOWNLOAD_PATH = "engine/download.php?id";
+        Document document = Jsoup.connect(url)
+                .method(Connection.Method.POST)
+                .header("User-Agent", USER_AGENT)
+                .header("charset", "utf-8")
+                .timeout(10000)
+                .get();
+
+        Element download = document.selectFirst("a.torrent");
+        if (download != null) {
+            String downloadLink = download.attr("href").replace("?do=download&id", DOWNLOAD_PATH);
+            System.out.println(downloadLink);
+        }
     }
 
     public static String getDataString(HashMap<String, String> params) throws UnsupportedEncodingException {

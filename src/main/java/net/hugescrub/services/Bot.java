@@ -90,7 +90,10 @@ public class Bot extends TelegramLongPollingBot {
                                 SendMessage.builder()
                                         .text("Available commands: \n\n" +
                                                 "/start: Initialize bot -> get file \n" +
-                                                "/all: Get all games available")
+                                                "/all: Get all games available \n\n" +
+                                                "Credits:\n" +
+                                                "@hugescrub\n" +
+                                                "https://github.com/hugescrub/")
                                         .chatId(chatId.toString())
                                         .build()
                         );
@@ -161,7 +164,6 @@ public class Bot extends TelegramLongPollingBot {
     public List<List<InlineKeyboardButton>> buttonsFromData(List<String> links, List<String> names) {
         // create rows and buttons
         List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
-        List<InlineKeyboardButton> rows = new ArrayList<>();
 
         // iterate links and names to put them in rows
         Iterator<String> linksIterator = links.listIterator();
@@ -174,7 +176,7 @@ public class Bot extends TelegramLongPollingBot {
                 List<InlineKeyboardButton> newButton = new ArrayList<>();
                 newButton.add(InlineKeyboardButton.builder()
                         .text(namesIterator.next())
-                        .url(linksIterator.next())
+                        .callbackData(linksIterator.next())
                         .build());
                 buttons.add(newButton);
                 counter++;

@@ -85,9 +85,10 @@ public class TrackerParser {
     }
 
     @SneakyThrows
-    public static void getFile(String url) {
+    public static String getFile(String url) {
 
         final String DOWNLOAD_PATH = "engine/download.php?id";
+
         Document document = Jsoup.connect(url)
                 .method(Connection.Method.POST)
                 .header("User-Agent", USER_AGENT)
@@ -95,16 +96,21 @@ public class TrackerParser {
                 .timeout(10000)
                 .get();
 
-        Element download = document.selectFirst("a.torrent");
-        if (download != null) {
-            String downloadLink = download.attr("href").replace("?do=download&id", DOWNLOAD_PATH);
-            System.out.println(downloadLink);
+        Element downloadElement = document.selectFirst("a.torrent");
+
+        if (downloadElement != null) {
+            // transform source link into download link
+            return downloadElement.attr("href").replace("?do=download&id", DOWNLOAD_PATH);
+        } else {
+            return "No torrent file present. Try again later.";
         }
     }
 
     public static String getDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
+
         StringBuilder result = new StringBuilder();
         boolean first = true;
+
         for (Map.Entry<String, String> entry : params.entrySet()) {
             if (first)
                 first = false;

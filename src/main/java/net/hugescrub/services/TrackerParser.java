@@ -1,13 +1,11 @@
 package net.hugescrub.services;
 
-import lombok.SneakyThrows;
 import net.hugescrub.models.GamesResults;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -21,12 +19,9 @@ import java.util.Map;
 public class TrackerParser {
     private static final String BASE_URL = "https://it.itorrents-igruha.org";
     private static final String URL_PATH = "/index.php?";
-    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36 OPR/86.0.4363.70";
+    public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36 OPR/86.0.4363.70";
 
     public static GamesResults searchGames(String searchString) {
-
-        URL url = null;
-        String response = null;
 
         HashMap<String, String> urlEncodedMap = new HashMap<>();
         urlEncodedMap.put("do", "search");
@@ -41,7 +36,7 @@ public class TrackerParser {
         try {
             // get url-encoded string
             String requestBody = getDataString(urlEncodedMap);
-            url = new URL(String.format("%s/%s%s", BASE_URL, URL_PATH, requestBody));
+            URL url = new URL(String.format("%s/%s%s", BASE_URL, URL_PATH, requestBody));
 
             Document document = Jsoup.connect(url.toString())
                     .method(Connection.Method.POST)
@@ -51,13 +46,11 @@ public class TrackerParser {
                     .timeout(10000)
                     .get();
 
+            // select links and names
             Elements gameData = document.select("div.article-film-title > a");
-            System.out.println(gameData);
-
-            System.out.println();
 
             gameLinks = new ArrayList<>();
-            System.out.println("Links:\n");
+            System.out.println("Links:");
             for (Element elementLink : gameData) {
                 gameLinks.add(elementLink.attr("href"));
                 System.out.println(elementLink.attr("href"));
@@ -66,7 +59,7 @@ public class TrackerParser {
             System.out.println();
 
             gameNames = new ArrayList<>();
-            System.out.println("Game names:\n");
+            System.out.println("Game names:");
             for (Element elementName : gameData) {
                 gameNames.add(elementName.text());
                 System.out.println(elementName.text());
@@ -84,17 +77,21 @@ public class TrackerParser {
         return gamesResults;
     }
 
-    @SneakyThrows
     public static String getFile(String url) {
 
         final String DOWNLOAD_PATH = "engine/download.php?id";
 
-        Document document = Jsoup.connect(url)
-                .method(Connection.Method.POST)
-                .header("User-Agent", USER_AGENT)
-                .header("charset", "utf-8")
-                .timeout(10000)
-                .get();
+        Document document = null;
+        try {
+            document = Jsoup.connect(url)
+                    .method(Connection.Method.POST)
+                    .header("User-Agent", USER_AGENT)
+                    .header("charset", "utf-8")
+                    .timeout(10000)
+                    .get();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         Element downloadElement = document.selectFirst("a.torrent");
 
@@ -122,4 +119,6 @@ public class TrackerParser {
         }
         return result.toString();
     }
+
+
 }

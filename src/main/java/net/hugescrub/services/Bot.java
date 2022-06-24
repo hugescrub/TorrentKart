@@ -26,7 +26,7 @@ public class Bot extends TelegramLongPollingBot {
      *
      * @param update contains user message.
      */
-    @SneakyThrows
+
     @Override
     public void onUpdateReceived(Update update) {
 
@@ -60,14 +60,11 @@ public class Bot extends TelegramLongPollingBot {
 
         Long chatId = callbackQuery.getFrom().getId();
         String torrentFileUrl = callbackQuery.getData();
+        String fileName = "result.torrent";
 
         try {
-
-            SendDocument sendDocument = new SendDocument();
-            sendDocument.setChatId(chatId.toString());
-            sendDocument.setDocument(
-                    new InputFile(torrentFileUrl)
-            );
+            FileDownloader fileDownloader = new FileDownloader();
+            SendDocument sendDocument = fileDownloader.sendFile(chatId, torrentFileUrl, fileName);
 
             // for debug
             System.out.println("Callback data: " + callbackQuery.getData());
@@ -123,7 +120,6 @@ public class Bot extends TelegramLongPollingBot {
                                     SendMessage.builder()
                                             .text("Available commands: \n\n" +
                                                     "/start: Initialize bot -> get file \n" +
-                                                    "/all: Get all games available \n\n" +
                                                     "Credits:\n" +
                                                     "@hugescrub\n" +
                                                     "https://github.com/hugescrub/")
@@ -159,6 +155,13 @@ public class Bot extends TelegramLongPollingBot {
                 execute(
                         SendMessage.builder()
                                 .text("Enter game name...")
+                                .chatId(chatId.toString())
+                                .build()
+                );
+            } else if (message.getText().equals("Find by genre")) {
+                execute(
+                        SendMessage.builder()
+                                .text("Not yet done...")
                                 .chatId(chatId.toString())
                                 .build()
                 );

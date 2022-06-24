@@ -53,9 +53,8 @@ public class Bot extends TelegramLongPollingBot {
      * @param callbackQuery Represents a callback query we use for getting data from button pressed.
      */
 
-    /* TODO: URL sendDocument method only works with zip, gif and pdf files.
-        Connect database for the files to be uploaded into and then sent to telegram servers.
-       */
+    // TODO: (Not crucial) Connect database for storing files.
+
     public void sendFileOnCallback(CallbackQuery callbackQuery) {
 
         Long chatId = callbackQuery.getFrom().getId();

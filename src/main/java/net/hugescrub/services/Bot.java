@@ -1,9 +1,7 @@
 package net.hugescrub.services;
 
-import lombok.SneakyThrows;
 import net.hugescrub.models.GamesResults;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.*;
@@ -12,7 +10,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import java.util.*;
 
@@ -54,7 +51,6 @@ public class Bot extends TelegramLongPollingBot {
      */
 
     // TODO: (Not crucial) Connect database for storing files.
-
     public void sendFileOnCallback(CallbackQuery callbackQuery) {
 
         Long chatId = callbackQuery.getFrom().getId();
@@ -64,7 +60,6 @@ public class Bot extends TelegramLongPollingBot {
         try {
             FileDownloader fileDownloader = new FileDownloader();
             SendDocument sendDocument = fileDownloader.sendFile(chatId, torrentFileUrl, fileName);
-
             // for debug
             System.out.println("Callback data: " + callbackQuery.getData());
             execute(sendDocument);
@@ -91,7 +86,6 @@ public class Bot extends TelegramLongPollingBot {
 
                     switch (command) {
                         case "/start":
-
                             // create button rows
                             KeyboardRow firstRow = new KeyboardRow();
                             KeyboardRow secondRow = new KeyboardRow();
@@ -226,12 +220,5 @@ public class Bot extends TelegramLongPollingBot {
     @Override
     public String getBotToken() {
         return BOT_TOKEN;
-    }
-
-    @SneakyThrows
-    public static void main(String[] args) {
-        Bot bot = new Bot();
-        TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-        telegramBotsApi.registerBot(bot);
     }
 }

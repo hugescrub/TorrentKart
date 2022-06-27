@@ -11,12 +11,13 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.IOException;
 import java.util.*;
 
 public class Bot extends TelegramLongPollingBot {
 
-    static final String BOT_NAME = "@bot_name";
-    static final String BOT_TOKEN = "bot_token";
+    private static final String BOT_NAME = System.getenv("BOT_NAME");
+    private static final String BOT_TOKEN = System.getenv("BOT_TOKEN");
 
     /**
      * Receiving messages.
@@ -49,8 +50,6 @@ public class Bot extends TelegramLongPollingBot {
     /**
      * @param callbackQuery Represents a callback query we use for getting data from button pressed.
      */
-
-    // TODO: (Not crucial) Connect database for storing files.
     public void sendFileOnCallback(CallbackQuery callbackQuery) {
 
         Long chatId = callbackQuery.getFrom().getId();
@@ -65,6 +64,18 @@ public class Bot extends TelegramLongPollingBot {
             execute(sendDocument);
         } catch (TelegramApiException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+            try {
+                execute(
+                        SendMessage.builder()
+                                .chatId(chatId.toString())
+                                .text("The game is either not out yet or the file is not accessible at the moment.")
+                                .build()
+                );
+            } catch (TelegramApiException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 

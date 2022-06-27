@@ -4,8 +4,8 @@ import java.util.List;
 
 public class GamesResults {
 
-    List<String> gameLinks;
-    List<String> gameNames;
+    private List<String> gameLinks;
+    private List<String> gameNames;
 
     public List<String> getGameLinks() {
         return gameLinks;

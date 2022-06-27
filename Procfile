@@ -1,1 +1,1 @@
-worker: java -Xmx300m -Xss512k -XX:CICompilerCount=2 -D file.encoding=UTF-8 -cp ./target/classes:./target/dependency/* net.hugescrub.App
+worker: java -Xmx300m -Xss512k -XX:CICompilerCount=2 -D -cp ./target/classes:./target/dependency/* net.hugescrub.App

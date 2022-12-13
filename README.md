@@ -7,7 +7,7 @@ Following libraries were used:
 ## What's done so far
 - Searching the game by it's name (or the whole franchise by specifying franchise name).
 - Getting torrent file for the requested game via chat message.
-- Now deployed on Heroku.
+- Now deployed on Heroku [As of December 2022, Heroku no longer offers free dynos].
 
 ## To be done
 - Full search (genre, release date, etc).
